@@ -1,16 +1,5 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyD5AUkL9IiNTxOVkY5hD5GPS8r9kx3oeuw",
-  authDomain: "project-planning-tool-eb561.firebaseapp.com",
-  projectId: "project-planning-tool-eb561",
-  storageBucket: "project-planning-tool-eb561.firebasestorage.app",
-  messagingSenderId: "973672610025",
-  appId: "1:973672610025:web:4375d93729615724d19878",
-  measurementId: "G-P72HWF3YY5"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+// Firebase configuration is now in firebase-config.js
+// Import Firebase modules will be done via dynamic imports
 
 document.addEventListener('DOMContentLoaded', async function() {
     // Import Firebase service functions
