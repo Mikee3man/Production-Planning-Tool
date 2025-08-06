@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Planning Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase SDK -->
+    <script type="module" src="firebase-config.js"></script>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Production Planning Tool</h1>
+            <div class="month-selector">
+                <button id="prev-month">◀</button>
+                <span id="current-month-display">Month Year</span>
+                <button id="next-month">▶</button>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Raw Material Received Per Week</h2>
+            <div class="table-container">
+                <table id="raw-material-table">
+                    <thead>
+                        <tr>
+                            <th>Week</th>
+                            <th>PCW (Post Consumer Waste)</th>
+                            <th>PIW (Post Industrial Waste)</th>
+                            <th>Total</th>
+                            <th>End of Week Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="raw-material-body">
+                        <!-- Rows will be added dynamically -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Monthly Total</td>
+                            <td id="pcw-total">0.0</td>
+                            <td id="piw-total">0.0</td>
+                            <td id="raw-total">0.0</td>
+                            <td id="eow-stock">0.0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Daily Production (Washed Flake)</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="planned">Planned</button>
+                <button class="tab-btn" data-tab="actual">Actual</button>
+            </div>
+            
+            <div class="tab-content active" id="planned-tab">
+                <div class="table-container">
+                    <table id="planned-production-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>M</th>
+                                <th>T</th>
+                                <th>W</th>
+                                <th>Th</th>
+                                <th>F</th>
+                                <th>S</th>
+                                <th>Su</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planned-production-body">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Monthly Total</td>
+                                <td id="planned-m-total">0.0</td>
+                                <td id="planned-t-total">0.0</td>
+                                <td id="planned-w-total">0.0</td>
+                                <td id="planned-th-total">0.0</td>
+                                <td id="planned-f-total">0.0</td>
+                                <td id="planned-s-total">0.0</td>
+                                <td id="planned-su-total">0.0</td>
+                                <td id="planned-total">0.0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="actual-tab">
+                <div class="table-container">
+                    <table id="actual-production-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>M</th>
+                                <th>T</th>
+                                <th>W</th>
+                                <th>Th</th>
+                                <th>F</th>
+                                <th>S</th>
+                                <th>Su</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="actual-production-body">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Monthly Total</td>
+                                <td id="actual-m-total">0.0</td>
+                                <td id="actual-t-total">0.0</td>
+                                <td id="actual-w-total">0.0</td>
+                                <td id="actual-th-total">0.0</td>
+                                <td id="actual-f-total">0.0</td>
+                                <td id="actual-s-total">0.0</td>
+                                <td id="actual-su-total">0.0</td>
+                                <td id="actual-total">0.0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Product Split</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="planned-split">Planned</button>
+                <button class="tab-btn" data-tab="actual-split">Actual</button>
+            </div>
+            
+            <div class="tab-content active" id="planned-split-tab">
+                <div class="table-container">
+                    <table id="planned-split-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>RP 101 Black (%)</th>
+                                <th>RP 106 White (%)</th>
+                                <th>Non PP (%)</th>
+                                <th>RP 101 Black (Tons)</th>
+                                <th>RP 106 White (Tons)</th>
+                                <th>Non PP (Tons)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="planned-split-body">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Monthly Total</td>
+                                <td id="planned-rp101-percent">0.0</td>
+                                <td id="planned-rp106-percent">0.0</td>
+                                <td id="planned-nonPP-percent">0.0</td>
+                                <td id="planned-rp101-total">0.0</td>
+                                <td id="planned-rp106-total">0.0</td>
+                                <td id="planned-nonPP-total">0.0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="actual-split-tab">
+                <div class="table-container">
+                    <table id="actual-split-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>RP 101 Black (%)</th>
+                                <th>RP 106 White (%)</th>
+                                <th>Non PP (%)</th>
+                                <th>RP 101 Black (Tons)</th>
+                                <th>RP 106 White (Tons)</th>
+                                <th>Non PP (Tons)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="actual-split-body">
+                            <!-- Rows will be added dynamically -->
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>Monthly Total</td>
+                                <td id="actual-rp101-percent">0.0</td>
+                                <td id="actual-rp106-percent">0.0</td>
+                                <td id="actual-nonPP-percent">0.0</td>
+                                <td id="actual-rp101-total">0.0</td>
+                                <td id="actual-rp106-total">0.0</td>
+                                <td id="actual-nonPP-total">0.0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Monthly Production Overview</h2>
+            <div class="monthly-totals">
+                <div class="total-item">
+                    <span class="total-label">Total Planned Production:</span>
+                    <span id="monthly-planned-total" class="total-value">0.0</span>
+                    <span class="total-unit">tons</span>
+                </div>
+                <div class="total-item">
+                    <span class="total-label">Total Actual Production:</span>
+                    <span id="monthly-actual-total" class="total-value">0.0</span>
+                    <span class="total-unit">tons</span>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="production-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <button id="save-btn">Save Data</button>
+            <button id="load-btn">Load Data</button>
+            <button id="export-btn">Export to Excel</button>
+            <button id="current-month-btn">Go to Current Month</button>
+        </div>
+    </div>
+    
+    <!-- Firebase Service Module -->
+    <script type="module" src="firebase-service.js"></script>
+    
+    <!-- Main Application Script -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
