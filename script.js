@@ -2,6 +2,9 @@
 // Import Firebase modules will be done via dynamic imports
 
 document.addEventListener('DOMContentLoaded', async function() {
+    // Import base URL for GitHub Pages compatibility
+    const { baseUrl } = await import('./base-url.js');
+    
     // Import Firebase service functions
     const { loadDataFromFirestore, subscribeToDataChanges } = await import('./firebase-service.js');
     

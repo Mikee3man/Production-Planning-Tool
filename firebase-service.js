@@ -1,6 +1,7 @@
 // Firebase service functions for Production Planning Tool
 // This file contains functions to interact with Firestore database
 
+import { baseUrl } from './base-url.js';
 import { db, collection, doc, setDoc, getDoc, getDocs, onSnapshot } from './firebase-config.js';
 
 // Collection reference for all months data
