@@ -133,8 +133,8 @@
         <div class="section">
             <h2>Product Split</h2>
             <div class="tabs">
-                <button class="tab-btn active" data-tab="planned-split">Planned</button>
-                <button class="tab-btn" data-tab="actual-split">Actual</button>
+                <button class="tab-btn active" onclick="switchTab(this, 'planned-split')" data-tab="planned-split">Planned</button>
+                <button class="tab-btn" onclick="switchTab(this, 'actual-split')" data-tab="actual-split">Actual</button>
             </div>
             
             <div class="tab-content active" id="planned-split-tab">
