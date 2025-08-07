@@ -2,7 +2,30 @@
 // This file contains functions to interact with Firestore database
 
 import { baseUrl } from './base-url.js';
-import { db, collection, doc, setDoc, getDoc, getDocs, onSnapshot } from './firebase-config.js';
+
+// Import Firebase modules directly to ensure they're loaded before use
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyD5AUkL9IiNTxOVkY5hD5GPS8r9kx3oeuw",
+  authDomain: "project-planning-tool-eb561.firebaseapp.com",
+  databaseURL: "https://project-planning-tool-eb561-default-rtdb.firebaseio.com",
+  projectId: "project-planning-tool-eb561",
+  storageBucket: "project-planning-tool-eb561.firebasestorage.app",
+  messagingSenderId: "973672610025",
+  appId: "1:973672610025:web:4375d93729615724d19878",
+  measurementId: "G-P72HWF3YY5"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Initialize Firestore
+const db = getFirestore(app);
 
 // Collection reference for all months data
 const allMonthsDataCollection = collection(db, 'allMonthsData');

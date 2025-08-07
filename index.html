@@ -8,8 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Base URL for GitHub Pages -->
     <script type="module" src="./base-url.js"></script>
-    <!-- Firebase SDK -->
-    <script type="module" src="./firebase-config.js"></script>
+    <!-- Firebase SDK - Note: Firebase modules are imported directly in firebase-config.js -->
 </head>
 <body>
     <div class="container">
@@ -230,10 +229,21 @@
         </div>
     </div>
     
-    <!-- Firebase Service Module -->
-    <script type="module" src="./firebase-service.js"></script>
+    <!-- Diagnostic Script -->
+    <script type="module">
+        // Add a diagnostic script to check for Firebase initialization issues
+        window.addEventListener('error', function(event) {
+            console.error('Global error caught:', event.error);
+            alert('An error occurred: ' + event.error.message);
+        });
+        
+        // Log when the page is fully loaded
+        window.addEventListener('load', function() {
+            console.log('Page fully loaded');
+        });
+    </script>
     
-    <!-- Main Application Script -->
+    <!-- Main Application Script - This will import firebase-service.js -->
     <script type="module" src="./script.js"></script>
 </body>
 </html>
