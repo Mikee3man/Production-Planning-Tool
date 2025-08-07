@@ -234,12 +234,35 @@
         // Add a diagnostic script to check for Firebase initialization issues
         window.addEventListener('error', function(event) {
             console.error('Global error caught:', event.error);
-            alert('An error occurred: ' + event.error.message);
+            const errorDiv = document.createElement('div');
+            errorDiv.style.color = 'red';
+            errorDiv.style.padding = '10px';
+            errorDiv.style.margin = '10px';
+            errorDiv.style.border = '1px solid red';
+            errorDiv.textContent = 'Error: ' + (event.error ? event.error.message : event.message);
+            document.body.prepend(errorDiv);
         });
         
         // Log when the page is fully loaded
         window.addEventListener('load', function() {
             console.log('Page fully loaded');
+            
+            // Test tab switching
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    console.log('Tab button clicked:', this.getAttribute('data-tab'));
+                });
+            });
+            
+            // Test month navigation
+            document.getElementById('prev-month').addEventListener('click', function() {
+                console.log('Previous month button clicked');
+            });
+            
+            document.getElementById('next-month').addEventListener('click', function() {
+                console.log('Next month button clicked');
+            });
         });
     </script>
     

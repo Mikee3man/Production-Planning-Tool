@@ -2,32 +2,41 @@
 // Import Firebase modules will be done via dynamic imports
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Import base URL for GitHub Pages compatibility
-    const { baseUrl } = await import('./base-url.js');
+    console.log('DOM content loaded');
     
-    // Import Firebase service functions
-    const { loadDataFromFirestore, subscribeToDataChanges } = await import('./firebase-service.js');
-    
-    // Initialize the application
-    await initApp();
-    
-    // Set up event listeners
-    setupEventListeners();
-    
-    // Set up real-time data sync
-    subscribeToDataChanges((data) => {
-        if (data && Object.keys(data).length > 0) {
-            // Only update if the data is different from current data
-            const currentDataStr = JSON.stringify(allMonthsData);
-            const newDataStr = JSON.stringify(data);
-            
-            if (currentDataStr !== newDataStr) {
-                console.log('Received updated data from Firestore');
-                allMonthsData = data;
-                loadMonthData(currentViewMonth, currentViewYear);
+    try {
+        // Import base URL for GitHub Pages compatibility
+        const { baseUrl } = await import('./base-url.js');
+        
+        // Import Firebase service functions
+        const { loadDataFromFirestore, subscribeToDataChanges } = await import('./firebase-service.js');
+        
+        // Initialize the application
+        await initApp();
+        
+        // Set up event listeners - moved to the end to ensure DOM is fully ready
+        setTimeout(() => {
+            console.log('Setting up event listeners after delay');
+            setupEventListeners();
+        }, 500);
+        
+        // Set up real-time data sync
+        subscribeToDataChanges((data) => {
+            if (data && Object.keys(data).length > 0) {
+                // Only update if the data is different from current data
+                const currentDataStr = JSON.stringify(allMonthsData);
+                const newDataStr = JSON.stringify(data);
+                
+                if (currentDataStr !== newDataStr) {
+                    console.log('Received updated data from Firestore');
+                    allMonthsData = data;
+                    loadMonthData(currentViewMonth, currentViewYear);
+                }
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error('Error during initialization:', error);
+    }
 });
 
 // Add event listener for page unload/refresh to auto-save data
@@ -1097,73 +1106,159 @@ function parseDate(dateStr) {
 
 // Set up event listeners
 function setupEventListeners() {
+    console.log('Setting up event listeners');
+    
     // Tab switching
     const tabButtons = document.querySelectorAll('.tab-btn');
+    console.log('Found tab buttons:', tabButtons.length);
+    
+    // Remove any existing click listeners to prevent duplicates
     tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        const newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+    });
+    
+    // Add fresh click listeners
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        console.log('Adding click listener to button:', button.getAttribute('data-tab'));
+        button.addEventListener('click', function(event) {
+            // Prevent default behavior
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Tab button clicked:', this.getAttribute('data-tab'));
             const tabId = this.getAttribute('data-tab');
             
-            // Remove active class from all buttons and tabs
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            // Get parent tabs container to scope our selectors
+            const tabsContainer = this.closest('.tabs').parentNode;
             
-            // Add active class to clicked button and corresponding tab
+            // Remove active class from all buttons in this tab group
+            tabsContainer.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Remove active class from all tab contents in this section
+            tabsContainer.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
             this.classList.add('active');
-            document.getElementById(tabId + '-tab').classList.add('active');
+            
+            // Find the tab content element
+            const tabElement = tabsContainer.querySelector('#' + tabId + '-tab');
+            
+            console.log('Tab element to activate:', tabId + '-tab', tabElement);
+            if (tabElement) {
+                tabElement.classList.add('active');
+            } else {
+                console.error('Tab element not found:', tabId + '-tab');
+            }
         });
     });
     
     // Previous month button
-    document.getElementById('prev-month').addEventListener('click', function() {
-        // Save current month data before switching
-        saveCurrentMonthData();
+    const prevMonthBtn = document.getElementById('prev-month');
+    console.log('Previous month button:', prevMonthBtn);
+    
+    // Remove any existing click listeners to prevent duplicates
+    if (prevMonthBtn) {
+        const newPrevMonthBtn = prevMonthBtn.cloneNode(true);
+        prevMonthBtn.parentNode.replaceChild(newPrevMonthBtn, prevMonthBtn);
         
-        // Go to previous month
-        currentViewMonth--;
-        if (currentViewMonth < 0) {
-            currentViewMonth = 11; // December
-            currentViewYear--;
-        }
-        
-        // Update display and load data
-        updateMonthDisplay();
-        weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
-        loadMonthData(currentViewMonth, currentViewYear);
-    });
+        // Add fresh click listener
+        document.getElementById('prev-month').addEventListener('click', function(event) {
+            // Prevent default behavior
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Previous month button clicked');
+            // Save current month data before switching
+            saveCurrentMonthData();
+            
+            // Go to previous month
+            currentViewMonth--;
+            if (currentViewMonth < 0) {
+                currentViewMonth = 11; // December
+                currentViewYear--;
+            }
+            
+            // Update display and load data
+            updateMonthDisplay();
+            weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
+            loadMonthData(currentViewMonth, currentViewYear);
+        });
+    } else {
+        console.error('Previous month button not found');
+    }
     
     // Next month button
-    document.getElementById('next-month').addEventListener('click', function() {
-        // Save current month data before switching
-        saveCurrentMonthData();
+    const nextMonthBtn = document.getElementById('next-month');
+    console.log('Next month button:', nextMonthBtn);
+    
+    // Remove any existing click listeners to prevent duplicates
+    if (nextMonthBtn) {
+        const newNextMonthBtn = nextMonthBtn.cloneNode(true);
+        nextMonthBtn.parentNode.replaceChild(newNextMonthBtn, nextMonthBtn);
         
-        // Go to next month
-        currentViewMonth++;
-        if (currentViewMonth > 11) {
-            currentViewMonth = 0; // January
-            currentViewYear++;
-        }
-        
-        // Update display and load data
-        updateMonthDisplay();
-        weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
-        loadMonthData(currentViewMonth, currentViewYear);
-    });
+        // Add fresh click listener
+        document.getElementById('next-month').addEventListener('click', function(event) {
+            // Prevent default behavior
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Next month button clicked');
+            // Save current month data before switching
+            saveCurrentMonthData();
+            
+            // Go to next month
+            currentViewMonth++;
+            if (currentViewMonth > 11) {
+                currentViewMonth = 0; // January
+                currentViewYear++;
+            }
+            
+            // Update display and load data
+            updateMonthDisplay();
+            weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
+            loadMonthData(currentViewMonth, currentViewYear);
+        });
+    } else {
+        console.error('Next month button not found');
+    }
     
     // Current month button
-    document.getElementById('current-month-btn').addEventListener('click', function() {
-        // Save current month data before switching
-        saveCurrentMonthData();
+    const currentMonthBtn = document.getElementById('current-month-btn');
+    console.log('Current month button:', currentMonthBtn);
+    
+    // Remove any existing click listeners to prevent duplicates
+    if (currentMonthBtn) {
+        const newCurrentMonthBtn = currentMonthBtn.cloneNode(true);
+        currentMonthBtn.parentNode.replaceChild(newCurrentMonthBtn, currentMonthBtn);
         
-        // Go to current month
-        const currentDate = new Date();
-        currentViewMonth = currentDate.getMonth();
-        currentViewYear = currentDate.getFullYear();
-        
-        // Update display and load data
-        updateMonthDisplay();
-        weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
-        loadMonthData(currentViewMonth, currentViewYear);
-    });
+        // Add fresh click listener
+        document.getElementById('current-month-btn').addEventListener('click', function(event) {
+            // Prevent default behavior
+            event.preventDefault();
+            event.stopPropagation();
+            
+            console.log('Current month button clicked');
+            // Save current month data before switching
+            saveCurrentMonthData();
+            
+            // Go to current month
+            const currentDate = new Date();
+            currentViewMonth = currentDate.getMonth();
+            currentViewYear = currentDate.getFullYear();
+            
+            // Update display and load data
+            updateMonthDisplay();
+            weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
+            loadMonthData(currentViewMonth, currentViewYear);
+        });
+    } else {
+        console.error('Current month button not found');
+    }
     
     // Save button
     document.getElementById('save-btn').addEventListener('click', async function() {
