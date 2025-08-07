@@ -15,9 +15,9 @@
         <div class="header">
             <h1>Production Planning Tool</h1>
             <div class="month-selector">
-                <button id="prev-month">◀</button>
+                <button id="prev-month" onclick="prevMonth()">◀</button>
                 <span id="current-month-display">Month Year</span>
-                <button id="next-month">▶</button>
+                <button id="next-month" onclick="nextMonth()">▶</button>
             </div>
         </div>
         
@@ -53,8 +53,8 @@
         <div class="section">
             <h2>Daily Production (Washed Flake)</h2>
             <div class="tabs">
-                <button class="tab-btn active" data-tab="planned">Planned</button>
-                <button class="tab-btn" data-tab="actual">Actual</button>
+                <button class="tab-btn active" data-tab="planned" onclick="switchTab(this, 'planned')">Planned</button>
+                <button class="tab-btn" data-tab="actual" onclick="switchTab(this, 'actual')">Actual</button>
             </div>
             
             <div class="tab-content active" id="planned-tab">
@@ -225,12 +225,12 @@
             <button id="save-btn">Save Data</button>
             <button id="load-btn">Load Data</button>
             <button id="export-btn">Export to Excel</button>
-            <button id="current-month-btn">Go to Current Month</button>
+            <button id="current-month-btn" onclick="goToCurrentMonth()">Go to Current Month</button>
         </div>
     </div>
     
     <!-- Diagnostic Script -->
-    <script type="module">
+    <script>
         // Add a diagnostic script to check for Firebase initialization issues
         window.addEventListener('error', function(event) {
             console.error('Global error caught:', event.error);
@@ -250,19 +250,15 @@
             // Test tab switching
             const tabButtons = document.querySelectorAll('.tab-btn');
             tabButtons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    console.log('Tab button clicked:', this.getAttribute('data-tab'));
-                });
+                console.log('Found tab button:', button.getAttribute('data-tab'));
             });
             
             // Test month navigation
-            document.getElementById('prev-month').addEventListener('click', function() {
-                console.log('Previous month button clicked');
-            });
+            const prevMonthBtn = document.getElementById('prev-month');
+            console.log('Previous month button found:', prevMonthBtn);
             
-            document.getElementById('next-month').addEventListener('click', function() {
-                console.log('Next month button clicked');
-            });
+            const nextMonthBtn = document.getElementById('next-month');
+            console.log('Next month button found:', nextMonthBtn);
         });
     </script>
     

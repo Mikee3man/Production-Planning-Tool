@@ -1,6 +1,7 @@
 // Firebase configuration is now in firebase-config.js
 // Import Firebase modules will be done via dynamic imports
 
+// Use DOMContentLoaded for initial setup
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOM content loaded');
     
@@ -13,12 +14,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Initialize the application
         await initApp();
-        
-        // Set up event listeners - moved to the end to ensure DOM is fully ready
-        setTimeout(() => {
-            console.log('Setting up event listeners after delay');
-            setupEventListeners();
-        }, 500);
         
         // Set up real-time data sync
         subscribeToDataChanges((data) => {
@@ -38,6 +33,109 @@ document.addEventListener('DOMContentLoaded', async function() {
         console.error('Error during initialization:', error);
     }
 });
+
+// Use window.onload to ensure all resources are fully loaded before setting up event listeners
+window.onload = function() {
+    console.log('Window fully loaded, setting up event listeners');
+    setupEventListeners();
+};
+
+// Direct functions for month navigation buttons
+function prevMonth() {
+    console.log('prevMonth function called directly');
+    // Save current month data before switching
+    saveCurrentMonthData();
+    
+    // Go to previous month
+    currentViewMonth--;
+    if (currentViewMonth < 0) {
+        currentViewMonth = 11; // December
+        currentViewYear--;
+    }
+    
+    // Update display and load data
+    updateMonthDisplay();
+    weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
+    loadMonthData(currentViewMonth, currentViewYear);
+}
+
+// Direct function for tab switching
+function switchTab(button, tabId) {
+    console.log('switchTab function called directly for:', tabId);
+    
+    // Get the parent tabs container
+    const tabsContainer = button.closest('.tabs');
+    console.log('Tabs container:', tabsContainer);
+    
+    if (!tabsContainer) {
+        console.error('Could not find parent tabs container');
+        return;
+    }
+    
+    // Remove active class from all buttons in this container
+    const allButtons = tabsContainer.querySelectorAll('.tab-btn');
+    console.log('Found buttons in container:', allButtons.length);
+    allButtons.forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Add active class to clicked button
+    button.classList.add('active');
+    console.log('Added active class to button');
+    
+    // Remove active class from all tab contents
+    const allTabContents = document.querySelectorAll('.tab-content');
+    console.log('Found tab contents:', allTabContents.length);
+    allTabContents.forEach(tab => {
+        tab.classList.remove('active');
+        console.log('Removed active class from tab content:', tab.id);
+    });
+    
+    // Find the tab content element
+    const tabElement = document.getElementById(tabId + '-tab');
+    
+    console.log('Tab element to activate:', tabId + '-tab', tabElement);
+    if (tabElement) {
+        tabElement.classList.add('active');
+        console.log('Activated tab content:', tabElement.id);
+    } else {
+        console.error('Tab element not found:', tabId + '-tab');
+    }
+}
+
+function nextMonth() {
+    console.log('nextMonth function called directly');
+    // Save current month data before switching
+    saveCurrentMonthData();
+    
+    // Go to next month
+    currentViewMonth++;
+    if (currentViewMonth > 11) {
+        currentViewMonth = 0; // January
+        currentViewYear++;
+    }
+    
+    // Update display and load data
+    updateMonthDisplay();
+    weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
+    loadMonthData(currentViewMonth, currentViewYear);
+}
+
+function goToCurrentMonth() {
+    console.log('goToCurrentMonth function called directly');
+    // Save current month data before switching
+    saveCurrentMonthData();
+    
+    // Go to current month
+    const currentDate = new Date();
+    currentViewMonth = currentDate.getMonth();
+    currentViewYear = currentDate.getFullYear();
+    
+    // Update display and load data
+    updateMonthDisplay();
+    weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
+    loadMonthData(currentViewMonth, currentViewYear);
+}
 
 // Add event listener for page unload/refresh to auto-save data
 window.addEventListener('beforeunload', async function() {
@@ -1112,67 +1210,87 @@ function setupEventListeners() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     console.log('Found tab buttons:', tabButtons.length);
     
-    // Remove any existing click listeners to prevent duplicates
-    tabButtons.forEach(button => {
-        const newButton = button.cloneNode(true);
-        button.parentNode.replaceChild(newButton, button);
+    // Log each tab button for debugging
+    tabButtons.forEach((button, index) => {
+        console.log(`Tab button ${index}:`, button.outerHTML);
     });
     
-    // Add fresh click listeners
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        console.log('Adding click listener to button:', button.getAttribute('data-tab'));
-        button.addEventListener('click', function(event) {
+    // Use direct onclick assignment instead of addEventListener
+    tabButtons.forEach(button => {
+        console.log('Setting onclick for button:', button.getAttribute('data-tab'));
+        
+        // Use direct onclick assignment
+        button.onclick = function(event) {
             // Prevent default behavior
             event.preventDefault();
             event.stopPropagation();
             
-            console.log('Tab button clicked:', this.getAttribute('data-tab'));
+            console.log('Tab button clicked via onclick:', this.getAttribute('data-tab'));
             const tabId = this.getAttribute('data-tab');
             
             // Get parent tabs container to scope our selectors
-            const tabsContainer = this.closest('.tabs').parentNode;
+            const tabsContainer = this.closest('.tabs');
+            console.log('Tabs container:', tabsContainer);
+            
+            if (!tabsContainer) {
+                console.error('Could not find parent tabs container');
+                return false;
+            }
             
             // Remove active class from all buttons in this tab group
-            tabsContainer.querySelectorAll('.tab-btn').forEach(btn => {
+            const allButtons = tabsContainer.querySelectorAll('.tab-btn');
+            console.log('Found buttons in container:', allButtons.length);
+            allButtons.forEach(btn => {
                 btn.classList.remove('active');
-            });
-            
-            // Remove active class from all tab contents in this section
-            tabsContainer.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
             });
             
             // Add active class to clicked button
             this.classList.add('active');
+            console.log('Added active class to button');
+            
+            // Remove active class from all tab contents
+            const allTabContents = document.querySelectorAll('.tab-content');
+            console.log('Found tab contents:', allTabContents.length);
+            allTabContents.forEach(tab => {
+                tab.classList.remove('active');
+                console.log('Removed active class from tab content:', tab.id);
+            });
             
             // Find the tab content element
-            const tabElement = tabsContainer.querySelector('#' + tabId + '-tab');
+            const tabElement = document.getElementById(tabId + '-tab');
             
             console.log('Tab element to activate:', tabId + '-tab', tabElement);
             if (tabElement) {
                 tabElement.classList.add('active');
+                console.log('Activated tab content:', tabElement.id);
             } else {
                 console.error('Tab element not found:', tabId + '-tab');
+                // Try without the -tab suffix as a fallback
+                const altTabElement = document.getElementById(tabId);
+                if (altTabElement) {
+                    console.log('Alternative tab element found:', altTabElement.id);
+                    altTabElement.classList.add('active');
+                } else {
+                    console.error('No tab element found for either ID:', tabId + '-tab', 'or', tabId);
+                }
             }
-        });
+            
+            return false; // Prevent event bubbling
+        };
     });
     
     // Previous month button
     const prevMonthBtn = document.getElementById('prev-month');
     console.log('Previous month button:', prevMonthBtn);
     
-    // Remove any existing click listeners to prevent duplicates
     if (prevMonthBtn) {
-        const newPrevMonthBtn = prevMonthBtn.cloneNode(true);
-        prevMonthBtn.parentNode.replaceChild(newPrevMonthBtn, prevMonthBtn);
-        
-        // Add fresh click listener
-        document.getElementById('prev-month').addEventListener('click', function(event) {
+        // Use direct onclick assignment
+        prevMonthBtn.onclick = function(event) {
             // Prevent default behavior
             event.preventDefault();
             event.stopPropagation();
             
-            console.log('Previous month button clicked');
+            console.log('Previous month button clicked via onclick');
             // Save current month data before switching
             saveCurrentMonthData();
             
@@ -1187,7 +1305,9 @@ function setupEventListeners() {
             updateMonthDisplay();
             weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
             loadMonthData(currentViewMonth, currentViewYear);
-        });
+            
+            return false; // Prevent event bubbling
+        };
     } else {
         console.error('Previous month button not found');
     }
@@ -1196,18 +1316,14 @@ function setupEventListeners() {
     const nextMonthBtn = document.getElementById('next-month');
     console.log('Next month button:', nextMonthBtn);
     
-    // Remove any existing click listeners to prevent duplicates
     if (nextMonthBtn) {
-        const newNextMonthBtn = nextMonthBtn.cloneNode(true);
-        nextMonthBtn.parentNode.replaceChild(newNextMonthBtn, nextMonthBtn);
-        
-        // Add fresh click listener
-        document.getElementById('next-month').addEventListener('click', function(event) {
+        // Use direct onclick assignment
+        nextMonthBtn.onclick = function(event) {
             // Prevent default behavior
             event.preventDefault();
             event.stopPropagation();
             
-            console.log('Next month button clicked');
+            console.log('Next month button clicked via onclick');
             // Save current month data before switching
             saveCurrentMonthData();
             
@@ -1222,7 +1338,9 @@ function setupEventListeners() {
             updateMonthDisplay();
             weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
             loadMonthData(currentViewMonth, currentViewYear);
-        });
+            
+            return false; // Prevent event bubbling
+        };
     } else {
         console.error('Next month button not found');
     }
@@ -1231,18 +1349,14 @@ function setupEventListeners() {
     const currentMonthBtn = document.getElementById('current-month-btn');
     console.log('Current month button:', currentMonthBtn);
     
-    // Remove any existing click listeners to prevent duplicates
     if (currentMonthBtn) {
-        const newCurrentMonthBtn = currentMonthBtn.cloneNode(true);
-        currentMonthBtn.parentNode.replaceChild(newCurrentMonthBtn, currentMonthBtn);
-        
-        // Add fresh click listener
-        document.getElementById('current-month-btn').addEventListener('click', function(event) {
+        // Use direct onclick assignment
+        currentMonthBtn.onclick = function(event) {
             // Prevent default behavior
             event.preventDefault();
             event.stopPropagation();
             
-            console.log('Current month button clicked');
+            console.log('Current month button clicked via onclick');
             // Save current month data before switching
             saveCurrentMonthData();
             
@@ -1255,7 +1369,9 @@ function setupEventListeners() {
             updateMonthDisplay();
             weeks = getWeeksInMonth(currentViewMonth, currentViewYear);
             loadMonthData(currentViewMonth, currentViewYear);
-        });
+            
+            return false; // Prevent event bubbling
+        };
     } else {
         console.error('Current month button not found');
     }
