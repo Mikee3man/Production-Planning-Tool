@@ -2,15 +2,16 @@
 // This file contains the Firebase configuration and initialization
 
 // Import Firebase modules
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
-// Replace these values with your own Firebase project configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyD5AUkL9IiNTxOVkY5hD5GPS8r9kx3oeuw",
   authDomain: "project-planning-tool-eb561.firebaseapp.com",
+  databaseURL: "https://project-planning-tool-eb561-default-rtdb.firebaseio.com",
   projectId: "project-planning-tool-eb561",
   storageBucket: "project-planning-tool-eb561.firebasestorage.app",
   messagingSenderId: "973672610025",
