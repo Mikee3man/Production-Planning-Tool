@@ -1025,6 +1025,9 @@ function updateActualSplitTotals(updatedIndex = -1) {
     document.getElementById('actual-nonPP-total').textContent = nonPPTotal.toFixed(2);
 }
 
+// The annotation plugin should be automatically registered with Chart.js
+// when loaded from CDN, so no manual registration is needed
+
 // Initialize chart
 function initializeChart() {
     const ctx = document.getElementById('production-chart').getContext('2d');
@@ -1167,12 +1170,87 @@ function updateChart() {
         });
     });
     
+    // Calculate average production per day (month to date)
+    let totalActualProduction = 0;
+    let daysWithProduction = 0;
+    
+    // Get current date for month-to-date calculation
+    const now = new Date();
+    const isCurrentMonth = (currentViewMonth === now.getMonth() && currentViewYear === now.getFullYear());
+    const currentDay = isCurrentMonth ? now.getDate() : daysInMonth;
+    
+    // Calculate total and count days with production
+    for (let i = 0; i < currentDay; i++) {
+        if (actualData[i] > 0) {
+            totalActualProduction += actualData[i];
+            daysWithProduction++;
+        }
+    }
+    
+    // Calculate average production per day
+    const avgProductionPerDay = daysWithProduction > 0 ? totalActualProduction / daysWithProduction : 0;
+    
+    // Calculate projected monthly total based on average
+    const projectedMonthlyTotal = avgProductionPerDay * daysInMonth;
+    
+    // Create horizontal line datasets for average and projection
+    const avgProductionData = new Array(daysInMonth).fill(avgProductionPerDay);
+    
     // Update chart data
     productionChart.data.labels = labels;
     productionChart.data.datasets[0].data = actualData;
     productionChart.data.datasets[1].data = plannedData;
     
+    // Add or update average production line
+    if (productionChart.data.datasets.length < 3) {
+        productionChart.data.datasets.push({
+            label: 'Avg Production/Day',
+            data: avgProductionData,
+            type: 'line',
+            fill: false,
+            borderColor: 'rgba(255, 159, 64, 1)',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            order: 0
+        });
+    } else {
+        productionChart.data.datasets[2].data = avgProductionData;
+    }
+    
+    // Remove the projected total line from the graph
+    // Keep only the calculated value displayed above the chart
+    if (productionChart.data.datasets.length === 4) {
+        productionChart.data.datasets.pop(); // Remove the projected total dataset if it exists
+    }
+    
+    // Update the monthly totals display
+    document.getElementById('monthly-planned-total').textContent = plannedData.reduce((a, b) => a + b, 0).toFixed(1);
+    document.getElementById('monthly-actual-total').textContent = totalActualProduction.toFixed(1);
+    
+    // Add average and projected total to the monthly totals section
+    updateOrCreateElement('avg-production-per-day', avgProductionPerDay.toFixed(1), 'Average Production/Day:');
+    updateOrCreateElement('projected-monthly-total', projectedMonthlyTotal.toFixed(1), 'Projected Monthly Total:');
+    
     productionChart.update();
+}
+
+// Helper function to update or create elements for the monthly totals section
+function updateOrCreateElement(id, value, label) {
+    let element = document.getElementById(id);
+    if (!element) {
+        const monthlyTotals = document.querySelector('.monthly-totals');
+        const newItem = document.createElement('div');
+        newItem.className = 'total-item';
+        newItem.innerHTML = `
+            <span class="total-label">${label}</span>
+            <span id="${id}" class="total-value">${value}</span>
+            <span class="total-unit">tons</span>
+        `;
+        monthlyTotals.appendChild(newItem);
+    } else {
+        element.textContent = value;
+    }
 }
 
 // Parse date from format "DD MMM"
