@@ -1172,23 +1172,19 @@ function updateChart() {
     
     // Calculate average production per day (month to date)
     let totalActualProduction = 0;
-    let daysWithProduction = 0;
     
     // Get current date for month-to-date calculation
     const now = new Date();
     const isCurrentMonth = (currentViewMonth === now.getMonth() && currentViewYear === now.getFullYear());
     const currentDay = isCurrentMonth ? now.getDate() : daysInMonth;
     
-    // Calculate total and count days with production
+    // Calculate total production up to current day
     for (let i = 0; i < currentDay; i++) {
-        if (actualData[i] > 0) {
-            totalActualProduction += actualData[i];
-            daysWithProduction++;
-        }
+        totalActualProduction += (actualData[i] || 0);
     }
     
-    // Calculate average production per day
-    const avgProductionPerDay = daysWithProduction > 0 ? totalActualProduction / daysWithProduction : 0;
+    // Calculate average production per day (using all days up to current date)
+    const avgProductionPerDay = currentDay > 0 ? totalActualProduction / currentDay : 0;
     
     // Calculate projected monthly total based on average
     const projectedMonthlyTotal = avgProductionPerDay * daysInMonth;
